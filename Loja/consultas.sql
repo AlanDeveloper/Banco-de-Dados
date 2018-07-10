@@ -7,6 +7,8 @@ SELECT (nome, sexo, salario) FROM "funcionario" WHERE salario > 2000;
 SELECT (nome, cpf) FROM "funcionario" 
 WHERE Lower(nome) like '%cadu%' or Lower(nome) like '%carla%' or Lower(login) like '%cadu%' or Lower(login) like '%carla%';
 
+-- % = qualquer pálavra que venha antes ou depóis (depende da posição)
+
 -- c. Fazer o item b para os clientes comparando apenas o nome
 
 SELECT (nome, cpf) FROM "cliente"
@@ -22,21 +24,32 @@ WHERE Lower(nome) like '%cadu%' or Lower(nome) like '%carla%' or Lower(login) li
 
 -- e. Mostrar os diferentes codDepartamento existentes na tabela Funcionario.
 
-SELECT DISTINCT (codDepartamento) FROM "funcionario";
+SELECT DISTINCT (codDepartamento) FROM "funcionario"
+ORDER BY codDepartamento;
+
+-- distinct mostra apenas os diferentes
+
+-- order by ordena de acordo com a coluna selecionada
 
 -- f. Mostrar todas as informações para cliente que possuem email no Hotmail ou gmail.
 
-SELECT (codCliente, nome, email, cpf) FROM "cliente"
+SELECT * FROM "cliente"
 WHERE email ilike '%gmail%' or email ilike '%hotmail%';
+
+-- ilike desconsidera maiúsculas e minúsculas
 
 -- g. Mostrar todas as informações para funcionários com salário entre 2000 e 6000 e idade entre 20 anos e 40 anos.
 
 SELECT * FROM "funcionario" WHERE salario BETWEEN 2000 and 6000 and extract(year FROM age(dataNascimento)) BETWEEN 20 and 40;
 
+-- between é um intervalo
+
 -- h. Ordene os funcionários pelo sexo (crescente) caso de empate pelo salário (decrescente)
 
 SELECT nome, sexo, salario FROM funcionario
-ORDER BY sexo, salario;
+ORDER BY sexo ASC, salario DESC;
+
+-- ASC = crescente , DESC = decrescente
 
 -- i. Os clientes ordenados pelo nome.
 
@@ -47,6 +60,8 @@ ORDER BY nome;
 
 SELECT AVG(salario) as media, MAX(salario), MIN(salario) FROM funcionario;
 
+-- avg calcula a média
+
 -- k. O item j por sexo.
 
 SELECT AVG(salario) as media, MAX(salario), MIN(salario), sexo FROM funcionario
@@ -54,16 +69,11 @@ GROUP BY sexo;
 
 -- l. Os funcionários que também são clientes e que possuem salário menor que 4500. Ordene a resposta pela data de nascimento, do mais velho para o mais novo.
 
-SELECT f.nome as funcionario_cliente, (f.nome = c.nome) AS correspondencia
-FROM funcionario f LEFT JOIN cliente c ON f.nome=c.nome
-ORDER BY f.nome;
+SELECT c.nome FROM funcionario f INNER JOIN cliente c ON f.nome = c.nome
+WHERE salario < 4500
+ORDER BY f.datanascimento DESC;
 
 -- m. Os funcionários que não são clientes.
-
-SELECT distinct c.nome as cliente, (f.nome != c.nome) AS correspondencia
-FROM funcionario f INNER JOIN cliente c ON f.nome!=c.nome
--- WHERE c.codcliente IS NULL
-ORDER BY c.nome;
 
 SELECT nome FROM funcionario
 EXCEPT
@@ -79,12 +89,14 @@ ORDER BY datavenda;
 -- o. Quantas vendas por ano.
 
 SELECT COUNT(datavenda) FROM notafiscal;
+-- errado
 
 -- p. CodProduto e total de itens vendidos ordenados pelo total vendido decrescente
 
 SELECT codproduto FROM produto;
 SELECT * FROM notafiscal;
 
+-- errado
 coalesce(par1, par2) -- retorna par1 caso não seja nulo, caso seja retorna par2
 
 -- Exercício 2
@@ -103,8 +115,8 @@ ORDER BY nome;
 
 -- c. A média salarial por sexo dos funcionários que não são clientes e têm mais de 30 anos.
 
-SELECT AVG(salario) AS media, sexo FROM funcionario
-WHERE extract(year FROM age(dataNascimento)) > 30
+SELECT AVG(salario) AS media, sexo FROM funcionario 
+WHERE cpf NOT IN ( SELECT cpf FROM cliente) and extract(year FROM age(dataNascimento)) > 30
 GROUP BY sexo;
 
 -- d. O item 1.j agrupado por nome do departamento e ordenado pelo nome do departamento para funcionários do sexo masculino com salário maior que 2000
@@ -112,3 +124,4 @@ GROUP BY sexo;
 SELECT AVG(salario) as media, MAX(salario), MIN(salario) FROM funcionario f;
 GROUP BY nome
 ORDER BY f.nome;
+-- errado
