@@ -88,16 +88,11 @@ ORDER BY datavenda;
 
 -- o. Quantas vendas por ano.
 
-SELECT COUNT(datavenda) FROM notafiscal;
--- errado
+SELECT COUNT (extract(year from datavenda)) from notafiscal group by (extract(year from datavenda))
 
 -- p. CodProduto e total de itens vendidos ordenados pelo total vendido decrescente
 
-SELECT codproduto FROM produto;
-SELECT * FROM notafiscal;
-
--- errado
-coalesce(par1, par2) -- retorna par1 caso não seja nulo, caso seja retorna par2
+SELECT sum(quantidade), codproduto from itemvenda group by codproduto order by sum(quantidade) desc
 
 -- Exercício 2
 
@@ -121,7 +116,33 @@ GROUP BY sexo;
 
 -- d. O item 1.j agrupado por nome do departamento e ordenado pelo nome do departamento para funcionários do sexo masculino com salário maior que 2000
 
-SELECT AVG(salario) as media, MAX(salario), MIN(salario) FROM funcionario f;
-GROUP BY nome
-ORDER BY f.nome;
--- errado
+SELECT min(salario), max(salario), avg(salario), departamento.nome 
+FROM funcionario INNER JOIN departamento ON funcionario.codDepartamento = departamento.codDepartamento 
+WHERE sexo = 'M' and salario > 2000
+GROUP BY departamento.nome
+ORDER BY departamento.nome;
+
+--e. A descrição dos produtos bem como o número de itens que foram vendidos, ordenado pelo número de itens que foram vendidos.Todos os produtos e total em R$ vendido 
+
+SELECT p.codproduto, p.descricao, sum(iv.quantidade) as quant 
+FROM Produto p INNER JOIN ItemVenda iv ON p.codproduto = iv.codproduto
+GROUP BY p.codproduto
+ORDER BY quant;
+
+ --f. A descrição e número de vezes que cada produto foi vendido, ordenado pelo número de vezes que foi vendido.
+SELECT iv.codproduto, p.descricao, COUNT(iv.codproduto) 
+FROM itemvenda iv INNER JOIN produto p ON iv.codproduto = p.codproduto 
+GROUP BY p.descricao, iv.codProduto
+ORDER BY iv.codProduto;
+
+--g. A listas dos clientes que mais vezes compram na loja. Nome e total de compras ordenado pelo total de compras.
+SELECT nf.codcliente, COUNT(nf.codCliente) AS "Total de compras"
+FROM notafiscal nf INNER JOIN cliente c ON nf.codcliente = c.codcliente
+GROUP BY nf.codcliente
+ORDER BY COUNT(nf.codcliente) desc
+
+--h. A lista dos funcionários que mais vendas realizaram. Nome e total de vendas realizadas ordenado pelo total de vendas.
+SELECT nf.codfuncionario AS "Codigo do Funcionario", COUNT(nf.codfuncionario) AS "Total de Vendas"
+FROM notafiscal nf INNER JOIN funcionario f ON nf.codfuncionario = f.codfuncionario
+GROUP BY nf.codfuncionario
+ORDER BY COUNT(nf.codfuncionario) desc
