@@ -146,3 +146,17 @@ SELECT nf.codfuncionario AS "Codigo do Funcionario", COUNT(nf.codfuncionario) AS
 FROM notafiscal nf INNER JOIN funcionario f ON nf.codfuncionario = f.codfuncionario
 GROUP BY nf.codfuncionario
 ORDER BY COUNT(nf.codfuncionario) desc
+
+--i. A lista de dos departamentos e o total em vendas (R$) realizadas por cada departamento.
+
+with new2 as (
+with new  as (select sum(iv.quantidade) as soma, iv.codnotafiscal, nf.codfuncionario
+from itemvenda iv inner join notafiscal nf on iv.codnotafiscal = nf.codnotafiscal
+group by iv.codnotafiscal, nf.codfuncionario
+order by soma)
+select nw.soma, nw.codnotafiscal, nw.codfuncionario, f.coddepartamento 
+from new nw full outer join funcionario f on nw.codfuncionario = f.codfuncionario)
+
+select coalesce(sum(n2.soma),0), d.nome, n2.coddepartamento from new2 n2 inner join departamento d on n2.coddepartamento = d.coddepartamento
+group by n2.coddepartamento, d.nome
+order by n2.coddepartamento
