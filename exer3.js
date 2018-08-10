@@ -5,9 +5,7 @@ CREATE VIEW "DadosFunci" AS
     INNER JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
     ORDER BY f.nome); 
 
-
 // Crie uma view que liste o número de compras e o total em reais comprado por cada cliente (o nome e cpf do cliente)
-
 
 WITH compras2 AS(
     WITH compras AS (
@@ -19,8 +17,6 @@ WITH compras2 AS(
 SELECT cp2.nome, cp2.cpf, SUM(iv.precounitvenda* iv.quantidade) AS "total" FROM compras2 cp2 INNER JOIN itemvenda iv ON cp2.codnotafiscal=iv.codnotafiscal
     GROUP BY cp2.nome, cp2.cpf;
 
-
-
 // Faça uma consulta que liste o nome dos funcionários e departamentos. Faça uma view para cada item de llistagem pedido:
 // a. Apenas funcionários alocados em um departamento e departamento com funcionários.
 // b. Todos funcionários e apenas departamentos com funcionários.
@@ -31,19 +27,42 @@ SELECT cp2.nome, cp2.cpf, SUM(iv.precounitvenda* iv.quantidade) AS "total" FROM 
 SELECT f.nome as "funcionario", dep.nome as "departamento" FROM funcionario f INNER JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
 ORDER BY f.nome;
 
+INSERT INTO departamento (codDepartamento, nome) VALUES
+(6, 'Distribuição'), (7, 'Transporte');
+
+INSERT INTO funcionario (codFuncionario, nome, cpf, salario, dataNascimento, sexo, login, senha, codDepartamento,codChefe) VALUES
+(10, 'Renata de Carmo', '124587652', 4000, to_date('17/01/2001','DD/MM/YYYY'), 'F', 'rere', md5('rere'), null,null), 
+(11, 'Gustavo de Souza', '326598785', 3000, to_date('10/03/1998','DD/MM/YYYY'), 'M', 'guti', md5('guti'),
+null, null);
+ 
 // a
 
-
+CREATE VIEW "FunciJobDepto" AS 
+(SELECT f.nome as "funcionario", dep.nome as "departamento" FROM funcionario f INNER JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
+ORDER BY f.nome);
 
 // b
-SELECT f.nome as "funcionario", dep.nome as "departamento" FROM funcionario f RIGHT OUTER JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
-ORDER BY f.nome;
 
+CREATE VIEW "FunciSemDepto" AS 
+(SELECT f.nome as "funcionario", dep.nome as "departamento" FROM funcionario f LEFT JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
+ORDER BY f.nome);
+
+// c
+
+CREATE VIEW "FunciComDepto" AS 
+(SELECT f.nome as "funcionario", dep.nome as "departamento" FROM funcionario f RIGHT JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
+ORDER BY f.nome);
+
+// d
+
+CREATE VIEW "Funci_Depto" AS 
+(SELECT f.nome as "funcionario", dep.nome as "departamento" FROM funcionario f FULL JOIN departamento dep ON f.coddepartamento=dep.coddepartamento
+ORDER BY f.nome);
 
 // Considerando a tabela Funcionario, cite uma coluna que é candidata a ter um índice e uma que não deve ter um índice. Após crie o índice para a coluna escolhida.
 
 
-CREATE INDEX "view_funcionario" ON funcionario (cpf)
+CREATE UNIQUE INDEX "view_funcionario" ON funcionario (cpf, nome)
 
 // Um sistema que utiliza o banco de dados apresentado realiza muitas pesquisas com filtro pela data de emissão de cada nota fiscal, essas consultas têm apresentado uma certa lentidão. Que solução você propõe para solucionar o problema (informe também o comando SQL para efetivar a solução)?
 
@@ -53,9 +72,17 @@ CREATE INDEX "view_funcionario" ON funcionario (cpf)
 
 BEGIN TRANSACTION;
     INSERT INTO notafiscal (datavenda, codfuncionario, codcliente) VALUES 
-(now(), 3, 2);
+(to_date('10/08/2018','DD/MM/YYYY'), 3, 2);
+    WITH "valor" AS (
+        SELECT * FROM produto
+        ORDER BY codproduto
+    ) 
     INSERT INTO itemVenda (codnotafiscal, codproduto, quantidade, precoUnitVenda) VALUES 
 (11,3,5,produto.precounit), (12,5,3,produto.precounit), (13,8,2,produto.precounit);  
+
+INSERT INTO itemVenda (codnotafiscal, codproduto, quantidade, precoUnitVenda)
+SELECT '11', '3', '5', produto.precoUnit FROM produto
+WHERE condition;
 
 // Liste o total de chefes que cada funcionário possui, considere o chefe de seu chefe direto e assim sucessivamente.
 
