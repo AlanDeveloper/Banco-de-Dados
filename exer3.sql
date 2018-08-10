@@ -68,26 +68,15 @@ CREATE UNIQUE INDEX "view_funcionario" ON funcionario (cpf, nome)
 
 -- Como é feito o controle de transações em Banco de dados, com quais comandos? Explique por que isso é útil.
 
+BEGIN - -iniciar
+COMMIT - -comitar/confirmar
+ROLLBACK - -parar/cancelar
+
+
 -- A venda de um conjunto de produtos é considerada uma transação única, ou seja, ou a venda dos produtos é realizada ou não. Crie uma transação que realize a compra dos produtos de código 3 (quantidade 5), 5 (quantidade 3) e 8 (quantidade 2) feita pelo funcionário de código 3 e cliente de código 2.
 
-BEGIN TRANSACTION;
+BEGIN TRANSACTION
     INSERT INTO notafiscal (datavenda, codfuncionario, codcliente) VALUES 
-(to_date('10/08/2018','DD/MM/YYYY'), 3, 2);
-    WITH "valor" AS (
-        SELECT * FROM produto
-        ORDER BY codproduto
-    ) 
+    (current_date - interval '5 mons', 3,2)
     INSERT INTO itemVenda (codnotafiscal, codproduto, quantidade, precoUnitVenda) VALUES 
-(11,3,5,produto.precounit), (12,5,3,produto.precounit), (13,8,2,produto.precounit);  
-
-INSERT INTO itemVenda (codnotafiscal, codproduto, quantidade, precoUnitVenda)
-SELECT '11', '3', '5', produto.precoUnit FROM produto
-
--- Liste o total de chefes que cada funcionário possui, considere o chefe de seu chefe direto e assim sucessivamente.
-
-
-
--- Liste o nome de cada funcionário e o total de vendas (quantidade de vendas) deste funcionário somadas à cadeia de funcionários que chefia.
-
-
--- Refaça o item anterior listando, ao invés do total de vendas o valor (em reais) total em vendas.
+    (1,1,1,6.5)
